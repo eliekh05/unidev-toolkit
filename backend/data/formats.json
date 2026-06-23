@@ -1,0 +1,106 @@
+{
+  "categories": {
+    "archive": {
+      "label": "Archive & Compressed",
+      "extensions": ["7z", "zip", "tar", "gz", "bz2", "xz", "rar", "jar", "apk", "dmg", "deb", "rpm", "msi", "appx", "msix", "ipa", "cab", "lz", "lzma", "z", "tgz", "tbz2", "txz"]
+    },
+    "code": {
+      "label": "Source Code",
+      "extensions": ["py", "js", "ts", "jsx", "tsx", "java", "c", "cpp", "cc", "cxx", "h", "hpp", "cs", "go", "rs", "rb", "php", "swift", "kt", "kts", "scala", "r", "m", "mm", "lua", "pl", "pm", "sh", "bash", "zsh", "fish", "ps1", "bat", "cmd", "sql", "html", "htm", "css", "scss", "sass", "less", "vue", "svelte", "dart", "ex", "exs", "erl", "hs", "clj", "cljs", "fs", "fsx", "v", "sv", "asm", "s", "pas", "pp", "d", "nim", "zig", "vhd", "vhdl", "tcl", "awk", "groovy", "gradle", "cmake", "make", "mk", "dockerfile", "proto", "graphql", "gql", "sol", "toml", "yaml", "yml", "json", "xml", "md", "markdown", "rst", "tex", "bib", "ini", "cfg", "conf", "env", "properties", "lock", "gitignore", "editorconfig"]
+    },
+    "image": {
+      "label": "Image",
+      "extensions": ["png", "jpg", "jpeg", "gif", "bmp", "webp", "svg", "ico", "tiff", "tif", "heic", "heif", "avif", "ppm", "pgm", "pbm", "xpm", "psd", "raw", "cr2", "nef", "dng"]
+    },
+    "audio": {
+      "label": "Audio",
+      "extensions": ["mp3", "wav", "flac", "ogg", "oga", "aac", "m4a", "wma", "aiff", "aif", "opus", "mid", "midi", "amr"]
+    },
+    "video": {
+      "label": "Video",
+      "extensions": ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "m4v", "mpeg", "mpg", "3gp", "ogv", "ts", "mts"]
+    },
+    "document": {
+      "label": "Document",
+      "extensions": ["pdf", "doc", "docx", "odt", "rtf", "txt", "csv", "tsv", "xls", "xlsx", "ods", "ppt", "pptx", "odp", "epub", "mobi", "azw", "azw3"]
+    },
+    "data": {
+      "label": "Data & Config",
+      "extensions": ["json", "xml", "yaml", "yml", "toml", "csv", "tsv", "sql", "sqlite", "db", "parquet", "avro", "msgpack", "pickle", "pkl", "hdf5", "h5", "nc", "geojson", "kml", "gpx"]
+    },
+    "web": {
+      "label": "Web & PWA",
+      "extensions": ["html", "htm", "css", "js", "mjs", "json", "webmanifest", "manifest", "svg", "woff", "woff2", "ttf", "eot", "wasm", "map"]
+    },
+    "cad": {
+      "label": "CAD & 3D",
+      "extensions": ["stl", "obj", "fbx", "dae", "gltf", "glb", "step", "stp", "iges", "igs", "dwg", "dxf", "3mf", "blend", "skp"]
+    },
+    "font": {
+      "label": "Font",
+      "extensions": ["ttf", "otf", "woff", "woff2", "eot", "pfb", "pfm"]
+    }
+  },
+  "conversion_matrix": {
+    "image": ["png", "jpg", "jpeg", "gif", "bmp", "webp", "ico", "tiff", "ppm", "pgm", "pbm"],
+    "code_text": ["txt", "md", "html", "json", "xml", "yaml", "csv"],
+    "code_cross": {
+      "py": ["js", "ts", "java", "c", "cpp", "go", "rs", "rb", "php", "swift", "kt", "cs", "lua", "sh", "txt", "md"],
+      "js": ["ts", "py", "java", "c", "cpp", "go", "rs", "txt", "md", "json"],
+      "ts": ["js", "py", "java", "txt", "md", "json"],
+      "java": ["py", "js", "c", "cpp", "cs", "kt", "txt", "md"],
+      "c": ["cpp", "py", "java", "go", "rs", "txt", "md"],
+      "cpp": ["c", "py", "java", "go", "rs", "txt", "md"],
+      "go": ["py", "js", "c", "cpp", "rs", "txt", "md"],
+      "rs": ["py", "go", "c", "cpp", "txt", "md"],
+      "swift": ["py", "java", "kt", "objc", "txt", "md"],
+      "kt": ["java", "py", "swift", "txt", "md"],
+      "rb": ["py", "js", "txt", "md"],
+      "php": ["py", "js", "txt", "md"],
+      "html": ["md", "txt", "xml"],
+      "css": ["scss", "sass", "less", "txt"],
+      "scss": ["css", "sass", "less", "txt"],
+      "sass": ["css", "scss", "less", "txt"],
+      "less": ["css", "scss", "sass", "txt"],
+      "json": ["yaml", "xml", "toml", "csv", "txt"],
+      "yaml": ["json", "xml", "toml", "txt"],
+      "xml": ["json", "yaml", "html", "txt"],
+      "toml": ["json", "yaml", "txt"],
+      "csv": ["json", "yaml", "tsv", "txt", "xml"],
+      "tsv": ["csv", "json", "txt"],
+      "md": ["html", "txt", "rst"],
+      "sql": ["txt", "md"]
+    },
+    "document": ["txt", "md", "html", "csv", "json"]
+  },
+  "monaco_languages": {
+    "py": "python", "js": "javascript", "ts": "typescript", "jsx": "javascript", "tsx": "typescript",
+    "java": "java", "c": "c", "cpp": "cpp", "cc": "cpp", "cxx": "cpp", "h": "c", "hpp": "cpp",
+    "cs": "csharp", "go": "go", "rs": "rust", "rb": "ruby", "php": "php", "swift": "swift",
+    "kt": "kotlin", "kts": "kotlin", "scala": "scala", "r": "r", "m": "objective-c", "mm": "objective-c",
+    "lua": "lua", "pl": "perl", "sh": "shell", "bash": "shell", "zsh": "shell", "fish": "shell",
+    "ps1": "powershell", "bat": "bat", "cmd": "bat", "sql": "sql", "html": "html", "htm": "html",
+    "css": "css", "scss": "scss", "sass": "scss", "less": "less", "vue": "html", "svelte": "html",
+    "dart": "dart", "ex": "elixir", "exs": "elixir", "erl": "erlang", "hs": "haskell", "clj": "clojure",
+    "fs": "fsharp", "fsx": "fsharp", "v": "verilog", "sv": "systemverilog", "asm": "asm", "pas": "pascal",
+    "d": "d", "nim": "nim", "zig": "zig", "vhd": "vhdl", "vhdl": "vhdl", "tcl": "tcl", "groovy": "groovy",
+    "cmake": "cmake", "dockerfile": "dockerfile", "proto": "protobuf", "graphql": "graphql", "gql": "graphql",
+    "sol": "solidity", "toml": "toml", "yaml": "yaml", "yml": "yaml", "json": "json", "xml": "xml",
+    "md": "markdown", "markdown": "markdown", "rst": "restructuredtext", "tex": "latex", "ini": "ini",
+    "properties": "properties", "env": "shell", "lock": "json", "gitignore": "ignore", "editorconfig": "ini"
+  },
+  "build_targets": {
+    "web": ["dmg", "apk", "ipa", "msix"],
+    "electron": ["dmg", "msix", "apk"],
+    "react-native": ["apk", "ipa"],
+    "flutter": ["apk", "ipa", "dmg", "msix"],
+    "capacitor": ["apk", "ipa", "dmg", "msix"],
+    "cordova": ["apk", "ipa"],
+    "tauri": ["dmg", "msix", "apk"],
+    "pwa": ["apk", "ipa", "msix", "dmg"],
+    "android-native": ["apk"],
+    "ios-native": ["ipa"],
+    "dotnet": ["msix"],
+    "unknown": ["dmg", "apk", "ipa", "msix"]
+  }
+}

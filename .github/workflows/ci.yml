@@ -1,0 +1,68 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Verify backend imports
+        run: |
+          cd backend
+          python -c "from app import app; print('OK')"
+
+      - name: Build Docker image
+        run: docker build -t unidev-toolkit .
+
+  deploy-hf-space:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "HF_TOKEN or not configured skipping deploy"
+            exit 0
+          fi
+          pip install huggingface_hub
+          python -c "
+          from huggingface_hub import HfApi
+          api = HfApi(token='$HF_TOKEN')
+          api.upload_folder(
+              folder_path='.',
+              repo_id='$HF_SPACE',
+              repo_type='space',
+              ignore_patterns=['node_modules', '.git', 'frontend/node_modules', '__pycache__'],
+          )
+          print('Deployed to Hugging Face Space')
+          "

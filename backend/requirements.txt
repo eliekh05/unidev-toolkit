@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+websockets
+aiofiles
+httpx
+Pillow
+beautifulsoup4
+lxml
+pyyaml
+toml
+pygments
+pydantic
+pypdf
+reportlab
