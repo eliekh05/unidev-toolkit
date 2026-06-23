@@ -1,6 +1,6 @@
 ---
 title: UniDev Toolkit
-emoji: 
+emoji: 💻
 colorFrom: blue
 colorTo: purple
 sdk: docker
