@@ -50,8 +50,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "HF_TOKEN or not configured skipping deploy"
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE"]; then
+            echo "HF_TOKEN or HF_SPACE not configured skipping deploy"
             exit 0
           fi
           pip install huggingface_hub
