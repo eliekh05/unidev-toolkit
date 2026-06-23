@@ -22,7 +22,7 @@ deploy-hf:
   image: python:3.11-slim
   script:
     - |
-      if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE"]; then
+      if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
         echo "HF_TOKEN or HF_SPACE not set skipping deploy"
         exit 0
       fi
