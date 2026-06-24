@@ -4,7 +4,13 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-from services.packagers.common import copy_assets_to_staging, ensure_manifest, find_build_output, find_web_root
+from services.packagers.common import (
+    copy_assets_to_staging,
+    ensure_manifest,
+    find_build_output,
+    find_index_html,
+    find_web_root,
+)
 
 
 async def _try_bubblewrap(web_root: Path, manifest: dict, out_path: Path, log) -> bool:
@@ -48,18 +54,18 @@ async def _try_bubblewrap(web_root: Path, manifest: dict, out_path: Path, log) -
 
 
 def _fallback_apk(staging: Path, manifest: dict, out_path: Path) -> None:
-    """Minimal APK-shaped archive with web assets for sideload/dev workflows."""
+    """
+    Minimal APK-shaped ZIP archive that embeds the web assets under assets/www/,
+    preserving the original directory layout of the project.
+
+    The index.html entry point is discovered dynamically rather than assumed
+    to always be at assets/www/index.html — it may live in a subdirectory
+    (e.g. assets/www/dist/index.html) when the project uses a build tool.
+    """
     app_name = manifest.get("short_name", "App").replace(" ", "")
-    assets = staging / "assets" / "www"
-    assets.mkdir(parents=True, exist_ok=True)
-    for item in staging.iterdir():
-        if item.name in ("assets", "META-INF"):
-            continue
-        dest = assets / item.name
-        if item.is_dir():
-            shutil.copytree(item, dest, dirs_exist_ok=True)
-        else:
-            shutil.copy2(item, dest)
+
+    # Detect actual index.html path inside staging (before we re-root it)
+    index_rel = find_index_html(staging) or "index.html"
 
     manifest_xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -67,8 +73,10 @@ def _fallback_apk(staging: Path, manifest: dict, out_path: Path) -> None:
     android:versionCode="1"
     android:versionName="1.0">
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application android:label="{manifest.get('name', app_name)}"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -78,12 +86,24 @@ def _fallback_apk(staging: Path, manifest: dict, out_path: Path) -> None:
     </application>
 </manifest>"""
 
+    # strings.xml carries the entry-point path so a runtime WebView host can
+    # read it without hardcoding; useful for sideload/dev WebView shells.
+    strings_xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">{manifest.get('name', app_name)}</string>
+    <string name="start_url">file:///android_asset/www/{index_rel}</string>
+</resources>"""
+
     with zipfile.ZipFile(out_path, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("AndroidManifest.xml", manifest_xml)
-        zf.writestr("assets/www/index.html", (assets / "index.html").read_text() if (assets / "index.html").exists() else "<html><body>UniDev Build</body></html>")
-        for f in assets.rglob("*"):
-            if f.is_file() and f.name != "index.html":
-                zf.write(f, f"assets/www/{f.relative_to(assets).as_posix()}")
+        zf.writestr("res/values/strings.xml", strings_xml)
+
+        # Pack every file from staging into assets/www/<original-path>
+        for f in staging.rglob("*"):
+            if f.is_file():
+                arc_path = "assets/www/" + f.relative_to(staging).as_posix()
+                zf.write(f, arc_path)
+
         zf.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\nCreated-By: UniDev Toolkit\n")
 
 
@@ -97,10 +117,13 @@ async def package_apk(
     web_root = find_web_root(root)
     build_out = find_build_output(web_root) or web_root
     manifest = ensure_manifest(root, project_info, pwa_config)
-    out_path = dist_dir / "app.apk"
+    out_path = dist_dir / "app-apk.apk"
 
     staging = dist_dir / "staging_apk"
     copy_assets_to_staging(staging, build_out)
+
+    index_rel = find_index_html(staging)
+    await log(f"[apk] Entry point: assets/www/{index_rel or 'index.html'}\n")
 
     if shutil.which("java"):
         try:

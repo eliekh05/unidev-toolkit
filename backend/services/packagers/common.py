@@ -49,6 +49,20 @@ def find_build_output(web_root: Path) -> Path | None:
     return None
 
 
+def find_index_html(staging: Path) -> str | None:
+    """
+    Recursively search the staged web assets for index.html and return its
+    path *relative to the staging directory* using forward slashes.
+
+    We prefer the shallowest match, then alphabetical order so that
+    dist/index.html beats dist/subdir/index.html.
+    """
+    matches = sorted(staging.rglob("index.html"), key=lambda p: (len(p.parts), str(p)))
+    if not matches:
+        return None
+    return matches[0].relative_to(staging).as_posix()
+
+
 def ensure_manifest(root: Path, project_info: dict[str, Any], pwa_config: dict[str, Any] | None) -> dict[str, Any]:
     pwa = project_info.get("pwa", {})
     if pwa.get("manifest"):

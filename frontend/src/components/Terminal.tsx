@@ -42,11 +42,11 @@ export default function Terminal() {
     term.loadAddon(new WebLinksAddon());
     term.open(containerRef.current);
     fitAddon.fit();
-
     termRef.current = term;
 
     term.writeln('\x1b[1;33mUniDev Toolkit Terminal\x1b[0m');
-    term.writeln('Shared terminal across all tabs.');
+    term.writeln('\x1b[90mShared across all tabs. Build logs stream here automatically.\x1b[0m');
+    term.writeln('\x1b[90mSandboxed to the workspace directory. Credentials are not exposed.\x1b[0m');
     term.writeln('');
 
     let ws: WebSocket;
@@ -55,7 +55,7 @@ export default function Terminal() {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        term.writeln('\x1b[32mConnected.\x1b[0m');
+        term.writeln('\x1b[32m● Connected\x1b[0m');
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
       };
 
@@ -64,12 +64,12 @@ export default function Terminal() {
       };
 
       ws.onclose = () => {
-        term.writeln('\r\n\x1b[31mDisconnected. Refresh to reconnect.\x1b[0m');
+        term.writeln('\r\n\x1b[31m● Disconnected. Refresh to reconnect.\x1b[0m');
       };
 
       ws.onerror = () => {
-        term.writeln('\r\n\x1b[33mTerminal backend unavailable (PTY may require Linux).\x1b[0m');
-        term.writeln('You can still use Build, Convert, and Editor features.');
+        term.writeln('\r\n\x1b[33m● Terminal PTY unavailable (requires Linux).\x1b[0m');
+        term.writeln('Build logs will still appear here from all tabs.');
       };
 
       term.onData((data) => {
