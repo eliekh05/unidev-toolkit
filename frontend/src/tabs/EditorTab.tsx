@@ -17,7 +17,6 @@ export default function EditorTab() {
   const [targetFormat, setTargetFormat] = useState('');
   const [converting, setConverting] = useState(false);
   const [isBinary, setIsBinary] = useState(false);
-  const [pendingFormatSwitch, setPendingFormatSwitch] = useState('');
   const [unsaved, setUnsaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,7 +121,6 @@ export default function EditorTab() {
       alert(e instanceof Error ? e.message : 'Format switch failed');
     } finally {
       setConverting(false);
-      setPendingFormatSwitch('');
     }
   };
 
@@ -194,12 +192,7 @@ export default function EditorTab() {
               </select>
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  if (unsaved) {
-                    setPendingFormatSwitch(targetFormat);
-                  }
-                  switchFormat(targetFormat);
-                }}
+                onClick={() => switchFormat(targetFormat)}
                 disabled={converting || !targetFormat}
               >
                 {converting ? 'Converting…' : 'Switch Format'}

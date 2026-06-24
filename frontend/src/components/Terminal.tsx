@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Terminal as XTerm } from 'xterm';
+import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
-import 'xterm/css/xterm.css';
+import '@xterm/xterm/css/xterm.css';
 
 function getWsUrl(): string {
   const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
