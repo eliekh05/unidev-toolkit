@@ -51,30 +51,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install huggingface_hub
+        run: pip install --quiet huggingface_hub
+
       - name: Deploy to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_SPACE: ${{ secrets.HF_SPACE }}
-        run: |
-          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
-            echo "::warning::HF_TOKEN or HF_SPACE not set — skipping deploy"
-            exit 0
-          fi
-          pip install --quiet huggingface_hub
-          python - << 'PYEOF'
-import os
-from huggingface_hub import HfApi
-api = HfApi(token=os.environ["HF_TOKEN"])
-api.upload_folder(
-    folder_path=".",
-    repo_id=os.environ["HF_SPACE"],
-    repo_type="space",
-    ignore_patterns=[
-        ".git", ".github", "node_modules", "frontend/node_modules",
-        "__pycache__", "*.pyc", "frontend/dist",
-        ".venv", "*.egg-info",
-    ],
-    commit_message=f"Deploy from GitHub Actions — {os.environ.get('GITHUB_SHA','')[:8]}",
-)
-print("✓ Deployed to Hugging Face Space:", os.environ["HF_SPACE"])
-PYEOF
+        run: python .github/scripts/deploy_hf.py
