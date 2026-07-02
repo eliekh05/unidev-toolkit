@@ -1,16 +1,37 @@
+"""
+Shared utilities for all platform packagers.
+"""
+from __future__ import annotations
+
 import json
 import shutil
 from pathlib import Path
 from typing import Any
 
 
+# ---------------------------------------------------------------------------
+# Project-root / web-root detection
+# ---------------------------------------------------------------------------
+
 def find_web_root(root: Path) -> Path:
+    """Return the directory that contains package.json (or index.html for
+    static sites).  Never returns a directory that only has source files."""
     for candidate in [root, root / "frontend", root / "web", root / "app", root / "client"]:
         if (candidate / "package.json").exists():
             return candidate
         if (candidate / "index.html").exists() and candidate != root:
             return candidate
     return root
+
+
+# ---------------------------------------------------------------------------
+# Build-output detection
+# ---------------------------------------------------------------------------
+
+_BUILD_DIR_NAMES = ("dist", "build", "out", ".next", ".output")
+# Directories whose *presence* tells us we are looking at raw source, not a build
+_SOURCE_ONLY_MARKERS = ("src", "node_modules", ".git", "tsconfig.json", "vite.config.ts",
+                        "vite.config.js", "webpack.config.js", "package.json")
 
 
 def _is_build_artifact(path: Path) -> bool:
@@ -22,7 +43,15 @@ def _is_build_artifact(path: Path) -> bool:
 
 
 def find_build_output(web_root: Path) -> Path | None:
-    for name in ["dist", "build", "out", "public"]:
+    """
+    Return the compiled output directory (containing index.html), or None.
+
+    This function intentionally returns None rather than falling back to
+    ``web_root`` itself when no build output is found — callers that need a
+    fallback should handle it explicitly so they can warn the user instead of
+    silently including raw source files.
+    """
+    for name in _BUILD_DIR_NAMES:
         path = web_root / name
         if not path.exists():
             continue
@@ -30,32 +59,32 @@ def find_build_output(web_root: Path) -> Path | None:
             p for p in path.iterdir()
             if not _is_build_artifact(p) and p.name not in ("packages",)
         ]
+        # Direct hit
+        if (path / "index.html").exists():
+            return path
+        # One level deeper
         for child in children:
             if child.is_dir() and (child / "index.html").exists():
                 return child
-        if (path / "index.html").exists():
-            return path
-        for child in children:
-            if child.is_dir() and any(child.iterdir()):
-                return child
-        if children:
-            return children[0]
 
+    # Static site: index.html at the root and no build-output dir
     if (web_root / "index.html").exists():
-        return web_root
-    src = web_root / "src"
-    if src.exists():
-        return web_root
+        # Only treat this as a valid build output if it is NOT a raw source dir
+        source_markers = any((web_root / m).exists() for m in ("src",))
+        if not source_markers:
+            return web_root
+
     return None
 
 
+# ---------------------------------------------------------------------------
+# Helpers used by multiple packagers
+# ---------------------------------------------------------------------------
+
 def find_index_html(staging: Path) -> str | None:
     """
-    Recursively search the staged web assets for index.html and return its
-    path *relative to the staging directory* using forward slashes.
-
-    We prefer the shallowest match, then alphabetical order so that
-    dist/index.html beats dist/subdir/index.html.
+    Return the path of index.html relative to *staging*, using forward
+    slashes, preferring the shallowest match.
     """
     matches = sorted(staging.rglob("index.html"), key=lambda p: (len(p.parts), str(p)))
     if not matches:
@@ -63,7 +92,11 @@ def find_index_html(staging: Path) -> str | None:
     return matches[0].relative_to(staging).as_posix()
 
 
-def ensure_manifest(root: Path, project_info: dict[str, Any], pwa_config: dict[str, Any] | None) -> dict[str, Any]:
+def ensure_manifest(
+    root: Path,
+    project_info: dict[str, Any],
+    pwa_config: dict[str, Any] | None,
+) -> dict[str, Any]:
     pwa = project_info.get("pwa", {})
     if pwa.get("manifest"):
         return pwa["manifest"]
